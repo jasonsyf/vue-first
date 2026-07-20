@@ -55,22 +55,20 @@ export const useTaskStore = defineStore('taskStore', () => {
     isLoading.value = true
     errorMessage.value = ''
     try {
-      // 从 Vite 环境变量中读取 API 前缀地址 (即 /api)
-      const apiBase = import.meta.env.VITE_API_BASE_URL
+      // 从 Vite 环境变量中读取 API 前缀地址（开发环境为 /api 本地代理，生产环境为直接远程 API 地址）
+      const apiBase = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://jsonplaceholder.typicode.com' : '/api')
       
-      // 请求本地代理地址：http://localhost:5173/api/todos?_limit=5
-      // Vite 开发服务器会自动将其悄悄转发给 https://jsonplaceholder.typicode.com/todos?_limit=5 并规避同源跨域拦截！
       const response = await axios.get(`${apiBase}/todos?_limit=5`)
       
       const remoteTasks: Task[] = response.data.map((item: any) => ({
         id: Date.now() + Math.random(),
-        title: `[云端 API 代理请求] ${item.title}`,
+        title: `[云端 API 请求] ${item.title}`,
         isDone: item.completed
       }))
 
       taskList.value = [...remoteTasks, ...taskList.value]
     } catch (error: any) {
-      errorMessage.value = '拉取远程任务失败，请检查 Proxy 代理配置。'
+      errorMessage.value = '拉取远程任务失败，请检查网络或 Proxy 代理配置。'
       console.error('API 请求出错:', error)
     } finally {
       isLoading.value = false
