@@ -2,15 +2,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '../stores/useUserStore'
 
 const router = useRouter()
+const userStore = useUserStore()
 const username = ref('admin')
 const password = ref('123456')
 
 function handleLogin() {
   if (username.value.trim() && password.value.trim()) {
-    // 模拟将登录成功 Token 令牌存储在本地 localStorage 中
-    localStorage.setItem('user_token', 'mock_token_123456')
+    // 使用 Pinia 状态管理记录登录状态并持久化
+    userStore.login('mock_token_123456')
     ElMessage.success('🎉 登录成功！欢迎回来！')
     
     // 登录成功后跳转到任务记事本页面

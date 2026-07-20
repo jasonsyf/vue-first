@@ -43,17 +43,26 @@ const router = createRouter({
   routes
 })
 
+import { useUserStore } from '../stores/useUserStore'
+
 // ✨【核心学习点：router.beforeEach 全局前置路由安全守卫】✨
 // 每次 URL 尝试跳转前，都会先经过这个拦截器防火墙！
 router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+
+  // 如果已经登录，尝试访问登录页，直接跳转到任务列表
+  if (to.name === 'login' && userStore.isLoggedIn) {
+    next({ name: 'todos' })
+    return
+  }
+
   // 检查目标路径是否标记了 requiresAuth
   if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('user_token')
-    if (token) {
+    if (userStore.isLoggedIn) {
       // 身份校验通过，放行允许通过进入页面
       next()
     } else {
-      // 身份校验失败，拦截并弹出警告，重定向重退会到登录页
+      // 身份校验失败，拦截并弹出警告，重定向退回到登录页
       ElMessage.warning('🔒 该页面属于权限禁区，请先登录系统！')
       next({ name: 'login' })
     }

@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, provide } from 'vue'
+import { ref, provide } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from './stores/useUserStore'
 
 const router = useRouter()
+const userStore = useUserStore()
 const authorName = ref('阳光开发者')
 const appTheme = ref('#42b883')
 
 provide('authorName', authorName)
 provide('appTheme', appTheme)
 
-// 计算当前是否已经登录
-const isLoggedIn = computed(() => {
-  return !!localStorage.getItem('user_token')
-})
-
 function handleLogout() {
-  localStorage.removeItem('user_token')
+  userStore.logout()
   ElMessage.info('已成功安全退出登录。')
   router.push('/login')
 }
@@ -34,7 +31,7 @@ function handleLogout() {
 
       <!-- 登录状态控制提示组 -->
       <div class="user-status">
-        <template v-if="isLoggedIn">
+        <template v-if="userStore.isLoggedIn">
           <el-tag type="success" size="small">已登录鉴权</el-tag>
           <el-button type="danger" size="small" link @click="handleLogout">退出登录</el-button>
         </template>
